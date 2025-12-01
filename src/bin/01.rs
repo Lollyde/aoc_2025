@@ -1,4 +1,4 @@
-advent_of_code::solution!(1);
+advent_of_code::solution_with_check!(1, 1195, 6770);
 
 fn to_rotations(input: &str) -> Vec<i64> {
     input.to_ascii_lowercase().lines().into_iter()
