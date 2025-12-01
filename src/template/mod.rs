@@ -66,3 +66,31 @@ macro_rules! solution {
         }
     };
 }
+
+#[macro_export]
+macro_rules! solution_with_check {
+    ($day:expr, $solution1:expr, $solution2:expr) => {
+        $crate::solution_with_check!(@impl $day, [part_one, 1, $solution1] [part_two, 2, $solution2]);
+    };
+    ($day:expr, 1, $solution:expr) => {
+        $crate::solution_with_check!(@impl $day, [part_one, 1, $solution]);
+    };
+    ($day:expr, 2, $solution:expr) => {
+        $crate::solution_with_check!(@impl $day, [part_two, 2, $solution]);
+    };
+
+    (@impl $day:expr, $( [$func:expr, $part:expr, $solution:expr] )*) => {
+        /// The current day.
+        const DAY: $crate::template::Day = $crate::day!($day);
+
+        #[cfg(feature = "dhat-heap")]
+        #[global_allocator]
+        static ALLOC: dhat::Alloc = dhat::Alloc;
+
+        fn main() {
+            use $crate::template::runner::*;
+            let input = $crate::template::read_file("inputs", DAY);
+            $( run_part_with_solution($func, &input, DAY, $part, $solution); )*
+        }
+    };
+}

@@ -22,6 +22,16 @@ pub fn run_part<I: Copy, T: Display>(func: impl Fn(I) -> Option<T>, input: I, da
     }
 }
 
+pub fn run_part_with_solution<I: Copy, T: Display+PartialEq>(func: impl Fn(I) -> Option<T>, input: I, day: Day, part: u8, solution: T) {
+    let check: Option<T> = func(input);
+    run_part(func, input, day, part);
+    match check {
+        Some(x) if x == solution => println!("result {} == solution {} ✔️", x, solution),
+        Some(x) => println!("result {} != solution {} ❌", x, solution),
+        None => println!("result is none ????")
+    }
+}
+
 /// Run a solution part. The behavior differs depending on whether we are running a release or debug build:
 ///  1. in debug, the function is executed once.
 ///  2. in release, the function is benched (approx. 1 second of execution time or 10 samples, whatever take longer.)
