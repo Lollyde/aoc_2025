@@ -36,19 +36,18 @@ pub fn part_one(input: &str) -> Option<u64> {
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    Some(parse(input)//.take(1)
+    Some(parse(input)
         .map(|bank| {
-            let mut result: Vec<u32> = Vec::new();
+            let mut result: Vec<&u32> = Vec::new();
             let mut nextskip = 0;
-            let mut counter = 12usize;
-            while counter != 0 {
-                let n = bank.iter().skip(nextskip).rev().skip(counter - 1).max().unwrap();
-                nextskip = bank.iter().skip(nextskip).position(|e| e==n).unwrap() + nextskip + 1;
-                result.push(n.clone());
-                counter -= 1;
-            }
+            (0..=11usize).rev().for_each(|counter| {
+                let n = bank.iter().skip(nextskip).rev().skip(counter).max().unwrap();
+                nextskip = nextskip + bank.iter().skip(nextskip).position(|e| e==n).unwrap() + 1;
+                result.push(n);
+            });
+
             result.iter().rev().enumerate().map(|(n, e)|{
-                *e as u64*(10usize.pow(n as u32) as u64)
+                **e as u64*(10usize.pow(n as u32) as u64)
             }).sum::<u64>()
         })
         .sum::<u64>()
