@@ -27,36 +27,8 @@ struct FreshRange {
 }
 
 impl FreshRange {
-    fn range_size(&self) -> u64 {
-        if self.start == 0 && self.end == 0 {
-            return 0
-        }
-        (self.end - self.start) + 1
-    }
-
     fn is_in_range(&self, input: &u64) -> bool {
         input <= &self.end && input >= &self.start
-    }
-
-    fn fully_contains(&self, other: &FreshRange) -> bool {
-        self.is_in_range(&other.start) && self.is_in_range(&other.end)
-    }
-
-    fn overlaps_with(&self, other: &FreshRange) -> bool {
-        self.is_in_range(&other.start) || self.is_in_range(&other.end)
-    }
-
-    fn merge_with(&mut self, other: FreshRange) {
-        if self.fully_contains(&other) {
-            return;
-        } else {
-            if !self.is_in_range(&other.start) {
-                self.start = other.start;
-            }
-            if !self.is_in_range(&other.end) {
-                self.end = other.end;
-            }
-        }
     }
 
     fn from(input: &str) -> Option<FreshRange> {
@@ -107,7 +79,7 @@ fn parse(input: &str) -> (Vec<FreshRange>, Vec<u64>) {
 }
 
 pub fn part_one(input: &str) -> Option<u64> {
-    let (mut ranges, mut ids) = parse(input);
+    let (ranges, ids) = parse(input);
     Some(
         ids.iter()
             .filter(|id| {
@@ -121,7 +93,7 @@ pub fn part_one(input: &str) -> Option<u64> {
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    let (mut ranges, _) = parse(input);
+    let (ranges, _) = parse(input);
     let mut points = Vec::new();
     ranges.into_iter().for_each(|e| {
         let (one,two) = Point::from(e);
