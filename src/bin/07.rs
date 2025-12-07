@@ -3,7 +3,7 @@ advent_of_code::solution_with_check!(7, 1646, 32451134474991);
 pub fn part_one(input: &str) -> Option<u64> {
     let max_index = input.find('\n').unwrap();
     let mut beam_timelines:Vec<u64> = vec![0;max_index];
-    let mut input = input.lines();
+    let mut input = input.lines().step_by(2);
     beam_timelines[input.next().unwrap().find('S').unwrap()] = 1;
     Some(input.map(|line| {
             line.chars()
@@ -22,7 +22,7 @@ pub fn part_one(input: &str) -> Option<u64> {
 pub fn part_two(input: &str) -> Option<u64> {
     let max_index = input.find('\n').unwrap();
     let mut beam_timelines:Vec<u64> = vec![0;max_index];
-    let mut input = input.lines();
+    let mut input = input.lines().step_by(2);
     beam_timelines[input.next().unwrap().find('S').unwrap()] = 1;
     for line in input {
         line
