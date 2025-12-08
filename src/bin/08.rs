@@ -1,4 +1,4 @@
-advent_of_code::solution!(8);
+advent_of_code::solution_with_check!(8, 29406, 7499461416);
 
 #[derive(Debug)]
 struct Vertex {
