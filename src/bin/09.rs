@@ -18,48 +18,6 @@ impl Rect<'_> {
         self.points[0].area_with(self.points[1])
     }
 
-    fn overlaps(&self, line: &Line) -> bool {
-        let from_inside = self.is_inside_inclusive(line.from);
-        let to_inside = self.is_inside_inclusive(line.to);
-
-        if from_inside && to_inside
-            && !self.is_on_perimeter(line) {
-            return true;
-        }
-
-        let a = Point {
-            x: self.points[0].x,
-            y: self.points[1].y
-        };
-
-        let b = Point {
-            x: self.points[0].y,
-            y: self.points[1].x
-        };
-
-        let self_lines = [
-            Line{from: self.points[0], to: &a},
-            Line{from: self.points[0], to: &b},
-            Line{from: self.points[1], to: &a},
-            Line{from: self.points[1], to: &b}
-        ];
-
-        self_lines.iter().any(|e| e.intersects(line))
-    }
-
-    fn is_on_perimeter(&self, line: &Line) -> bool {
-        if line.is_horizontal() {
-            line.from.x == self.points[0].x || line.from.x == self.points[1].x
-        } else {
-            line.from.y == self.points[0].y || line.from.y == self.points[1].y
-        }
-    }
-
-    fn is_inside_inclusive(&self, point: &Point) -> bool {
-        is_between_inclusive((&self.points[0].x, &self.points[1].x), &point.x) &&
-            is_between_inclusive((&self.points[0].y, &self.points[1].y), &point.y)
-    }
-
     fn is_inside_exclusive(&self, point: &Point) -> bool {
         is_between_exclusive((&self.points[0].x, &self.points[1].x), &point.x) &&
             is_between_exclusive((&self.points[0].y, &self.points[1].y), &point.y)
@@ -67,46 +25,11 @@ impl Rect<'_> {
 
 }
 
-fn is_between_inclusive(a: (&usize, &usize), b: &usize) -> bool {
-    if a.0 < a.1 {
-        a.0 <= b && b <= a.1
-    } else {
-        a.1 <= b && b <= a.0
-    }
-}
-
 fn is_between_exclusive(a: (&usize, &usize), b: &usize) -> bool {
     if a.0 < a.1 {
         a.0 < b && b < a.1
     } else {
         a.1 < b && b < a.0
-    }
-}
-
-#[derive(Debug)]
-struct Line<'a> {
-    from: &'a Point,
-    to: &'a Point
-}
-
-impl Line<'_> {
-    fn intersects(&self, other: &Line) -> bool {
-        ((self.from.y > other.from.y && self.to.y < other.from.y) ||
-            (self.from.y < other.from.y && self.to.y > other.from.y)) &&
-        (self.from.x > other.from.x && self.to.x < other.from.x) ||
-            (self.from.x < other.from.x && self.to.x > other.from.x)
-
-    }
-
-    fn is_horizontal(&self) -> bool {
-        self.from.x == self.to.x
-    }
-
-    fn from<'a>(from: &'a Point, to: &'a Point) -> Line<'a> {
-        Line{
-            from,
-            to
-        }
     }
 }
 
@@ -153,37 +76,6 @@ pub fn part_one(input: &str) -> Option<u64> {
             })
         .flatten()
         .max()
-}
-
-pub fn part_two_old(input: &str) -> Option<u64> {
-    let points = input.lines().map(|e| e.parse::<Point>().unwrap()).collect::<Vec<Point>>();
-    let lines = points
-        .iter()
-        .zip(
-            points
-            .iter()
-            .cycle()
-            .skip(1))
-        .map(|(p1, p2)|{
-            Line::from(p1, p2)
-        }).collect::<Vec<Line>>();
-    let res = points
-        .iter()
-        .enumerate()
-        .map(|(index1, e)| {
-            points
-                .iter()
-                .enumerate()
-                .filter(|(index2, _)| index1 < *index2)
-                .map(|(_, p)| Rect::from(p, e))
-                .collect::<Vec<Rect>>()
-        })
-        .flatten()
-        .filter(|rect| lines.iter().all(|line| {!rect.overlaps(line)}))
-        .max_by_key(|rect| rect.area())
-        .unwrap();
-    dbg!(&res);
-    Some(res.area())
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
