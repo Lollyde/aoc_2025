@@ -6,11 +6,11 @@ use std::str::FromStr;
 use rayon::prelude::*;
 #[derive(Debug, Clone)]
 struct ButtonState {
-    current_state: Vec<u8>
+    current_state: Vec<u16>
 }
 
 impl ButtonState {
-    fn new(desired_state: &Vec<u8>) -> ButtonState {
+    fn new(desired_state: &Vec<u16>) -> ButtonState {
         let current_state = vec![0; desired_state.len()];
         ButtonState {
             //desired_state: desired_state.clone(),
@@ -18,7 +18,7 @@ impl ButtonState {
         }
     }
 
-    fn distance(&self, desired_state: &Vec<u8>) -> Option<u16> {
+    fn distance(&self, desired_state: &Vec<u16>) -> Option<u16> {
         let result = desired_state
             .iter()
             .rev()
@@ -26,7 +26,7 @@ impl ButtonState {
             .map(|(desired, current)| {
                 desired.checked_sub(*current)
             })
-            .collect::<Option<Vec<u8>>>();
+            .collect::<Option<Vec<u16>>>();
         match result {
             Some(v) => {
                 Some(v.iter().map(|e| *e as u16).sum::<u16>())
@@ -35,7 +35,7 @@ impl ButtonState {
         }
     }
 
-    fn apply(&self, buttons: &Vec<u16>, desired_state: &Vec<u8>) -> Vec<ButtonState> {
+    fn apply(&self, buttons: &Vec<u16>, desired_state: &Vec<u16>) -> Vec<ButtonState> {
         buttons
             .iter()
             .map(|button| {
@@ -72,7 +72,7 @@ impl ButtonState {
 struct Machine {
     desired_state: u16,
     buttons: Vec<u16>,
-    joltages: Vec<u8>
+    joltages: Vec<u16>
 }
 
 impl FromStr for Machine {
