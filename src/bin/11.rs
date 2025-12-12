@@ -1,7 +1,8 @@
+advent_of_code::solution_with_check!(11, 640, 367579641755680);
+
 use std::collections::BTreeMap;
 use std::hint::unreachable_unchecked;
 use rayon::prelude::*;
-advent_of_code::solution!(11);
 
 fn parse<'a>(input: &'a str, graph: &mut BTreeMap<&'a str,Vec<&'a str>>) {
     input
@@ -18,7 +19,7 @@ fn parse<'a>(input: &'a str, graph: &mut BTreeMap<&'a str,Vec<&'a str>>) {
                 .insert(name, line.collect::<Vec<&str>>());
         });
 }
-
+#[allow(dead_code)]
 fn count_paths(graph: &BTreeMap<&str, Vec<&str>>, from: &str, to: &str) -> u64 {
     let mut counts: BTreeMap<&str, u64> = BTreeMap::new();
     let mut next = match graph.get(from){
@@ -82,6 +83,7 @@ fn count_fast<'a>(graph: &BTreeMap<&'a str, Vec<&'a str>>, from: &'a str, to: &s
     total
 }
 
+#[allow(unused_variables, dead_code)]
 fn prune<'a>(mut graph: BTreeMap<&'a str, Vec<&'a str>>, from: &str, to: &str) -> BTreeMap<&'a str, Vec<&'a str>> {
     if to == "out" {
         return graph;
@@ -131,7 +133,7 @@ pub fn part_two(input: &str) -> Option<u64> {
     let d = count_fast(&graph, "svr", "fft", &mut Vec::with_capacity(graph.len()), &mut BTreeMap::new());
     let e = count_fast(&graph, "fft", "dac", &mut Vec::with_capacity(graph.len()), &mut BTreeMap::new());
     let f = count_fast(&graph, "dac", "out", &mut Vec::with_capacity(graph.len()), &mut BTreeMap::new());
-    dbg!(a,b,c,d,e,f);
+    //dbg!(a,b,c,d,e,f);
     Some((a*b*c) + (d*e*f))
 }
 

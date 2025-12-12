@@ -1,4 +1,4 @@
-advent_of_code::solution!(12);
+advent_of_code::solution_with_check!(12, 476, 0);
 
 pub fn part_one(input: &str) -> Option<u64> {
     // trivial check to filter out areas that definitely do work
@@ -27,7 +27,7 @@ pub fn part_one(input: &str) -> Option<u64> {
         .sum())
 }
 
-pub fn part_two(input: &str) -> Option<u64> {
+pub fn part_two(_input: &str) -> Option<u64> {
     None
 }
 

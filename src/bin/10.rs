@@ -1,15 +1,19 @@
-advent_of_code::solution!(10);
+advent_of_code::solution_with_check!(10, 419, 18369);
 
 //use std::collections::BTreeMap;
 use std::ops::BitXor;
 use std::str::FromStr;
 use rayon::prelude::*;
+
+
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 struct ButtonState {
     current_state: Vec<u16>
 }
 
 impl ButtonState {
+#[allow(dead_code)]
     fn new(desired_state: &Vec<u16>) -> ButtonState {
         let current_state = vec![0; desired_state.len()];
         ButtonState {
@@ -18,6 +22,7 @@ impl ButtonState {
         }
     }
 
+#[allow(dead_code)]
     fn distance(&self, desired_state: &Vec<u16>) -> Option<u16> {
         let result = desired_state
             .iter()
@@ -35,6 +40,7 @@ impl ButtonState {
         }
     }
 
+#[allow(dead_code)]
     fn apply(&self, buttons: &Vec<u16>, desired_state: &Vec<u16>) -> Vec<ButtonState> {
         buttons
             .iter()
@@ -79,7 +85,7 @@ impl FromStr for Machine {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut s = s.split(' ');
+        let s = s.split(' ');
         let desired_state = s
             .clone()
             .next().unwrap()
@@ -152,6 +158,8 @@ impl Machine {
         count
     }
 
+#[allow(dead_code)]
+    #[allow(unused_assignments)]
     fn solve_part2(&self) -> u64 {
         let mut count = 0;
         let mut min = u16::MAX;
