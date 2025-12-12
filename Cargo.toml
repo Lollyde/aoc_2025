@@ -30,3 +30,4 @@ log = "0.4.29"
 
 # Solution dependencies
 rayon = "1.11.0"
+microlp = "0.2.11"

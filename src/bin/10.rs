@@ -254,19 +254,53 @@ pub fn part_one(input: &str) -> Option<u64> {
         .sum())
 }
 
-/// so.
-/// this technically solves part 2, HOWEVER
-/// this is *not* performant enough to work on the real input.
-/// others' solutions appear to be using either integer linear programming
-/// or some sort of dfs algorithm
-/// (i think mine is technically bfs?)
-/// i've spent most of my day on this, im leaving it for at some point in the future.
+// https://github.com/timvisee/advent-of-code-2025/blob/master/day10b/src/main.rs
 pub fn part_two(input: &str) -> Option<u64> {
-    Some(input.
-        lines()
-        .map(|line| line.parse::<Machine>().unwrap())
-        .map(|machine| machine.solve_part2())
-        .sum())
+    use microlp::{LinearExpr, OptimizationDirection, Problem};
+    let presses = input
+        .lines()
+        .map(|line| {
+            let (first, last) = line.split_at(line.chars().position(|b| b == '{').unwrap());
+
+            let btns = first[1..]
+                .split_ascii_whitespace()
+                .skip(1)
+                .filter(|btns| !btns.is_empty())
+                .map(|btns| {
+                    btns[1..]
+                        .split(',')
+                        .map(|n| 1 << n[0..1].parse::<u16>().unwrap())
+                        .sum()
+                })
+                .collect::<Vec<u16>>();
+            let jolts = last[1..]
+                .strip_suffix('}').unwrap()
+                .split(',')
+                .map(|b| b.parse::<u16>().unwrap())
+                .collect::<Vec<u16>>();
+
+            let mut problem = Problem::new(OptimizationDirection::Minimize);
+            let max = jolts.iter().copied().max().unwrap();
+            let vars = (0..btns.len())
+                .map(|_| problem.add_integer_var(1.0, (0, max as i32)))
+                .collect::<Vec<_>>();
+            for (i, &n) in jolts.iter().enumerate() {
+                problem.add_constraint(
+                    btns.iter()
+                        .zip(&vars)
+                        .filter(|&(mask, _)| mask & (1 << i) != 0)
+                        .fold(LinearExpr::empty(), |mut ex, (_, &var)| {
+                            ex.add(var, 1.0);
+                            ex
+                        }),
+                    microlp::ComparisonOp::Eq,
+                    n as f64,
+                );
+            }
+            problem.solve().unwrap().objective().round() as usize
+        })
+        .sum::<usize>();
+    Some(presses as u64)
 }
 
 #[cfg(test)]
