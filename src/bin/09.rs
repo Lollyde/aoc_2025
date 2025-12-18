@@ -1,5 +1,6 @@
 advent_of_code::solution_with_check!(9, 4777967538, 1439894345);
 
+use std::cmp::{max, min};
 use rayon::prelude::*;
 
 #[derive(Debug)]
@@ -18,18 +19,58 @@ impl Rect<'_> {
         self.points[0].area_with(self.points[1])
     }
 
-    fn is_inside_exclusive(&self, point: &Point) -> bool {
-        is_between_exclusive((&self.points[0].x, &self.points[1].x), &point.x) &&
-            is_between_exclusive((&self.points[0].y, &self.points[1].y), &point.y)
-    }
+    fn overlaps_with(&self, line: &Line) -> bool {
 
+        let bottom = min(self.points[0].y, self.points[1].y);
+        let top = max(self.points[0].y, self.points[1].y);
+        let left = min(self.points[0].x, self.points[1].x);
+        let right = max(self.points[0].x, self.points[1].x);
+
+        let axis_min;
+        let axis_max;
+        let bound_min;
+        let bound_max;
+
+        if line.horizontal {
+            axis_min = bottom;
+            axis_max = top;
+            bound_min = left;
+            bound_max = right;
+        } else {
+            axis_min = left;
+            axis_max = right;
+            bound_min = bottom;
+            bound_max = top;
+        }
+
+
+        // axis goes THROUGH the square, not counting overlapping with edges
+        (line.axis > axis_min && axis_max > line.axis) &&
+            (
+                // AND the points arent outside of the bounds of the square
+                !(line.from >= bound_max && line.to >= bound_max) &&
+                !(line.from <= bound_min && line.to <= bound_min)
+            )
+    }
 }
 
-fn is_between_exclusive(a: (&usize, &usize), b: &usize) -> bool {
-    if a.0 < a.1 {
-        a.0 < b && b < a.1
-    } else {
-        a.1 < b && b < a.0
+#[derive(Debug)]
+struct Line {
+    from: usize,
+    to: usize,
+    axis: usize,
+    horizontal: bool
+}
+
+impl Line {
+    fn new(from: &Point, to: &Point) -> Line {
+        let horizontal = from.y == to.y;
+        Line {
+            from: min(if horizontal {from.x} else {from.y}, if horizontal {to.x} else {to.y}),
+            to: max(if horizontal {from.x} else {from.y}, if horizontal {to.x} else {to.y}),
+            axis: if horizontal {from.y} else {from.x},
+            horizontal
+        }
     }
 }
 
@@ -41,7 +82,7 @@ struct Point {
 
 impl Point {
     fn area_with(&self, other: &Point) -> u64 {
-        (self.x.abs_diff(other.x) + 1)  as u64 * (self.y.abs_diff(other.y) + 1) as u64
+        (self.x.abs_diff(other.x) + 1) as u64 * (self.y.abs_diff(other.y) + 1) as u64
     }
 }
 
@@ -80,57 +121,18 @@ pub fn part_one(input: &str) -> Option<u64> {
 
 pub fn part_two(input: &str) -> Option<u64> {
     let points = input.lines().map(|e| e.parse::<Point>().unwrap()).collect::<Vec<Point>>();
-    let perimeter = points
+    let lines: Vec<Line> = points
         .iter()
         .zip(
             points
                 .iter()
-                .cycle()
                 .skip(1))
-        .map(|(p1, p2)|{
-            let mut perimeter = Vec::with_capacity(p1.x.abs_diff(p2.x) + p1.y.abs_diff(p2.y));
-            if p1.x == p2.x {
-                let y1;
-                let y2;
-                if p1.y < p2.y {
-                    y1 = p1.y;
-                    y2 = p2.y;
-                } else {
-                    y1 = p2.y;
-                    y2 = p1.y;
-                }
-                for y in y1..y2 {
-                    perimeter.push(
-                        Point{
-                            x: p1.x,
-                            y
-                        }
-                    )
-                }
-            } else {
-                let x1;
-                let x2;
-                if p1.x < p2.x {
-                    x1 = p1.x;
-                    x2 = p2.x;
-                } else {
-                    x1 = p2.x;
-                    x2 = p1.x;
-                }
-                for x in x1..x2 {
-                    perimeter.push(
-                        Point{
-                            x,
-                            y: p1.y
-                        }
-                    )
-                }
-            }
-            perimeter
+        .map(|(p1, p2)| {
+            Line::new(p1, p2)
         })
-        .flatten()
-        .collect::<Vec<Point>>();
-    let res = points
+        .collect();
+
+    points
         .par_iter()
         .enumerate()
         .map(|(index1, e)| {
@@ -142,10 +144,18 @@ pub fn part_two(input: &str) -> Option<u64> {
                 .collect::<Vec<Rect>>()
         })
         .flatten()
-        .filter(|rect| !perimeter.iter().any(|point| rect.is_inside_exclusive(point)))
-        .max_by_key(|rect| rect.area())
-        .unwrap();
-    Some(res.area())
+        .fold(|| {0}, |max, rect| {
+            let area = rect.area();
+            if area > max {
+                if lines.iter().any(|e| rect.overlaps_with(e)) {
+                    max
+                } else {
+                    area
+                }
+            } else {
+                max
+            }
+        }).max()
 }
 
 #[cfg(test)]
