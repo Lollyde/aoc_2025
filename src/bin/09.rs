@@ -1,5 +1,6 @@
 advent_of_code::solution_with_check!(9, 4777967538, 1439894345);
 
+use std::cmp::min;
 use rayon::prelude::*;
 
 #[derive(Debug)]
@@ -18,6 +19,10 @@ impl Rect<'_> {
         self.points[0].area_with(self.points[1])
     }
 
+    fn overlaps_with(&self, line: &Line) -> bool {
+
+    }
+
     fn is_inside_exclusive(&self, point: &Point) -> bool {
         is_between_exclusive((&self.points[0].x, &self.points[1].x), &point.x) &&
             is_between_exclusive((&self.points[0].y, &self.points[1].y), &point.y)
@@ -30,6 +35,26 @@ fn is_between_exclusive(a: (&usize, &usize), b: &usize) -> bool {
         a.0 < b && b < a.1
     } else {
         a.1 < b && b < a.0
+    }
+}
+
+#[derive(Debug)]
+struct Line {
+    from: usize,
+    to: usize,
+    axis: usize,
+    horizontal: bool
+}
+
+impl Line {
+    fn new(from: &Point, to: &Point) -> Line {
+        let horizontal = from.y == to.y;
+        Line {
+            from: min(horizontal),
+            to,
+            axis,
+            horizontal
+        }
     }
 }
 
